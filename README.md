@@ -1,9 +1,13 @@
 Hello-OBP-OAuth1.0a-Node
 ========================
 
-This is a very basic application to demonstrate the integration of the OpenBankProject with OAuth1.0-Authentication into NodeJS.
+This is a very basic app to demonstrate the integration of the OpenBankProject with OAuth1.0-Authentication into a NodeJS application.
 
 ## SETUP
+
+Get consumer key / secret:  
+register your client at  
+https://apisandbox.openbankproject.com/consumer-registration  
 
 Install Dependencies:  
 npm install express  
