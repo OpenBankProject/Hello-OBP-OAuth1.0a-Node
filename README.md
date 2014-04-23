@@ -8,6 +8,7 @@ This is a very basic app to demonstrate the integration of the OpenBankProject w
 Get consumer key / secret:  
 register your client at  
 https://apisandbox.openbankproject.com/consumer-registration  
+and use the credentials as _openbankConsumerKey/_openbankConsumerSecret in oauth.js  
 
 Install Dependencies:  
 npm install express  
