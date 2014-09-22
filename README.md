@@ -11,7 +11,7 @@ https://apisandbox.openbankproject.com/consumer-registration
 and use the credentials as _openbankConsumerKey/_openbankConsumerSecret in oauth.js  
 
 Install Dependencies:  
-npm install express  
+npm install express@3.5.2 
 npm install oauth  
 
 Start Server:  
@@ -19,6 +19,11 @@ node oauth.js
 
 Navigate to the page:  
 Local host: http://127.0.0.1:8080  
+
+You can log in as a test user, using the following credentials:
+
+username: joe.bloggs@example.com
+password: qwerty
 
 ## REFERENCES
 
