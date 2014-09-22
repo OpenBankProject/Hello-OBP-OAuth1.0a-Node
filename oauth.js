@@ -81,9 +81,12 @@ app.get('/signed_in', function(req, res){
 });
 
 app.get('/getBanks', function(req, res){
-	consumer.get("https://apisandbox.openbankproject.com/obp/v1.2/banks/rbs/accounts/private", oauthAccessToken, oauthAccessTokenSecret, function (error, data, response) {
-		var parsedData = JSON.parse(data);
-		res.send(parsedData)
+	consumer.get("https://apisandbox.openbankproject.com/obp/v1.2.1/banks/rbs/accounts/private",
+	req.session.oauthAccessToken,
+	req.session.oauthAccessTokenSecret,
+	function (error, data, response) {
+	    var parsedData = JSON.parse(data);
+	    res.send(parsedData)
 	});
 });
 
