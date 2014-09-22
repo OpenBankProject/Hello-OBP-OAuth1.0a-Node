@@ -22,7 +22,7 @@ Local host: http://127.0.0.1:8080
 
 You can log in as a test user, using the following credentials:
 
-username: joe.bloggs@example.com
+username: joe.bloggs@example.com  
 password: qwerty
 
 ## REFERENCES
