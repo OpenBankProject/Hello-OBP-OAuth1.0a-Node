@@ -11,7 +11,7 @@ https://apisandbox.openbankproject.com/consumer-registration
 and use the credentials as _openbankConsumerKey/_openbankConsumerSecret in oauth.js  
 
 Install Dependencies:  
-npm install express@3.5.2 
+npm install express@3.5.2  
 npm install oauth  
 
 Start Server:  
