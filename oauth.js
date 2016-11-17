@@ -1,6 +1,6 @@
 // Open Bank Project
 
-// Copyright 2011,2014 TESOBE / Music Pictures Ltd.
+// Copyright 2011-2016 TESOBE Ltd.
 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 // limitations under the License.
 
 // Open Bank Project (http://www.openbankproject.com)
-// Copyright 2011-2015 TESOBE / Music Pictures Ltd.
+// Copyright 2011-2016 TESOBE Ltd.
 
 // This product includes software developed at
 // TESOBE (http://www.tesobe.com/)
@@ -34,8 +34,22 @@ var app = express();
 
 // To get the values for the following fields, please register your client here:
 // https://apisandbox.openbankproject.com/consumer-registration
-var _openbankConsumerKey = "yourOpenBankConsumerKey";
-var _openbankConsumerSecret = "yourOpenBankConsumerSecret";
+// Then create a file called config.json in this directory 
+// and paste your consumer key and secret like this:
+//config.json:
+//{ 
+//"consumerKey": "YOUR CONSUMER KEY GOES HERE",
+//"consumerSecret" : "YOUR CONSUMER SECRET GOES HERE"
+//}
+
+
+// This loads your consumer key and secret from a file you create.
+var config = require('./config.json');
+
+var _openbankConsumerKey = config.consumerKey;
+var _openbankConsumerSecret = config.consumerSecret;
+
+
 
 var base_url = 'https://apisandbox.openbankproject.com';
 var consumer = new oauth.OAuth(
@@ -44,7 +58,7 @@ var consumer = new oauth.OAuth(
   _openbankConsumerKey,
   _openbankConsumerSecret,
   '1.0',                             //rfc oauth 1.0, includes 1.0a
-  'http://127.0.0.1:8080/callback',
+  'http://127.0.0.1:8085/callback',
   'HMAC-SHA1');
 
 var cookieParser = require('cookie-parser');
@@ -89,12 +103,23 @@ app.get('/callback', function(req, res){
 
 
 app.get('/signed_in', function(req, res){
-  res.status(200).send('Signing in by OAuth worked. Now you can do API calls on private data like this one: <br><a href="/getBanks">Get private banks</a>')
+  res.status(200).send('Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> or <br><a href="/getCurrentUser">Get Current User</a> <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
 });
 
 
-app.get('/getBanks', function(req, res){
-  consumer.get("https://apisandbox.openbankproject.com/obp/v1.2.1/banks/rbs/accounts/private",
+app.get('/getCurrentUser', function(req, res){
+  consumer.get("https://apisandbox.openbankproject.com/obp/v2.1.0/users/current",
+  req.session.oauthAccessToken,
+  req.session.oauthAccessTokenSecret,
+  function (error, data, response) {
+      var parsedData = JSON.parse(data);
+      res.status(200).send(parsedData)
+  });
+});
+
+
+app.get('/getMyAccounts', function(req, res){
+  consumer.get("https://apisandbox.openbankproject.com/obp/v2.1.0/my/accounts",
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
   function (error, data, response) {
@@ -108,5 +133,5 @@ app.get('*', function(req, res){
   res.redirect('/connect');
 });
 
-app.listen(8080);
+app.listen(8085);
 

@@ -8,7 +8,18 @@ into a NodeJS application.
 
 Get consumer key / secret:
 register your client at https://apisandbox.openbankproject.com/consumer-registration
-and use the credentials as _openbankConsumerKey/_openbankConsumerSecret in oauth.js
+and add the key and secret in your config.json file like so:
+
+
+	config.json
+	
+    { 
+    "consumerKey": "YOUR CONSUMER KEY GOES HERE",
+    "consumerSecret" : "YOUR CONSUMER SECRET GOES HERE"
+    }
+
+
+
 
 Install Dependencies:
 npm install
@@ -17,8 +28,8 @@ Start Server:
 node oauth.js
 
 Navigate to the page:
-http://127.0.0.1:8080
-(not http://localhost:8080 in this example as the session won't be set)
+http://127.0.0.1:8085
+(not http://localhost:8085 in this example as the session won't be set)
 
 You can log in as a test user, using the following credentials:
 
