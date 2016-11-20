@@ -18,14 +18,14 @@
 // Copyright 2011-2016 TESOBE Ltd.
 
 // This product includes software developed at
-// TESOBE (http://www.tesobe.com/)
-// by
-// TESOBE: contact AT tesobe DOT com
-// Nina Gänsdorfer: nina AT tesobe DOT com
-// Everett Sochowski: everett AT tesobe DOT com
-// Stefan Bethge: stefan AT tesobe DOT com
+// TESOBE (http://www.tesobe.com/) contact AT tesobe DOT com
+// by:
+// Nina Gänsdorfer
+// Everett Sochowski
+// Stefan Bethge
+// Simon Redfern
 
-var express = require('express');
+var express = require('express', template = require('jade'));
 var session = require('express-session')
 var util = require('util');
 var oauth = require('oauth');
@@ -42,19 +42,35 @@ var app = express();
 //"consumerSecret" : "YOUR CONSUMER SECRET GOES HERE"
 //}
 
+// Template engine (previously known as Jade)
+var pug = require('pug');
 
 // This loads your consumer key and secret from a file you create.
 var config = require('./config.json');
+
+// Used to validate forms
+var bodyParser = require('body-parser')
+// app.use(bodyParser.urlencoded({
+//   extended: false
+// }));
+
+// create application/x-www-form-urlencoded parser 
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
+
 
 var _openbankConsumerKey = config.consumerKey;
 var _openbankConsumerSecret = config.consumerSecret;
 
 
 
-var base_url = 'https://apisandbox.openbankproject.com';
+var apiHost = config.apiHost;
+
+console.log ("apiHost is: " + apiHost)
+
+
 var consumer = new oauth.OAuth(
-  base_url + '/oauth/initiate',
-  base_url + '/oauth/token',
+  apiHost + '/oauth/initiate',
+  apiHost + '/oauth/token',
   _openbankConsumerKey,
   _openbankConsumerSecret,
   '1.0',                             //rfc oauth 1.0, includes 1.0a
@@ -76,7 +92,7 @@ app.get('/connect', function(req, res){
     } else {
       req.session.oauthRequestToken = oauthToken;
       req.session.oauthRequestTokenSecret = oauthTokenSecret;
-      res.redirect(base_url + "/oauth/authorize?oauth_token="+req.session.oauthRequestToken);
+      res.redirect(apiHost + "/oauth/authorize?oauth_token="+req.session.oauthRequestToken);
     }
   });
 });
@@ -103,7 +119,7 @@ app.get('/callback', function(req, res){
 
 
 app.get('/signed_in', function(req, res){
-  res.status(200).send('Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> or <br><a href="/getCurrentUser">Get Current User</a> <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
+  res.status(200).send('Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> <br><a href="/getCurrentUser">Get Current User</a> <br><a href="/createTransactionRequest">Create Transaction Request (make payment)</a> <br> <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
 });
 
 
@@ -127,6 +143,121 @@ app.get('/getMyAccounts', function(req, res){
       res.status(200).send(parsedData)
   });
 });
+
+
+app.get('/createTransactionRequest', function(req, res){
+  
+
+  var template = "./template/createTransactionRequest.pug";
+  var options = null; 
+  var html = pug.renderFile(template, options);
+
+
+  consumer.get("https://apisandbox.openbankproject.com/obp/v2.1.0/my/accounts",
+  req.session.oauthAccessToken,
+  req.session.oauthAccessTokenSecret,
+  function (error, data, response) {
+      var parsedData = JSON.parse(data);
+      res.status(200).send(html)
+  });
+});
+
+
+
+app.post('/createTransactionRequest', urlencodedParser, function(req, res){
+  
+  var template = "./template/createTransactionRequest.pug";
+  
+  
+
+
+  if (!req.body) return res.sendStatus(400)
+  
+  var fromBankId = req.body.from_bank_id;
+  var fromAccountId = req.body.from_account_id;
+
+  var toBankId = req.body.to_bank_id;
+  var toAccountId = req.body.to_account_id;
+
+  var currency = req.body.currency;
+  var amount = req.body.amount;
+
+  var description = req.body.description;
+
+
+  var transactionRequestType = req.body.transaction_request_type;
+  if (transactionRequestType == ""){
+    transactionRequestType = "SANDBOX_TAN";
+  }
+
+
+  // Build the body that we will post
+  var toObj = {"bank_id": toBankId, "account_id": toAccountId};
+  var valueObj = {"currency":currency, "amount":amount};
+
+  var detailsObj = {"to": toObj, "value": valueObj, "description": description}
+
+  var details = JSON.stringify(detailsObj)
+
+  console.log("detailsObj is: " + details);
+
+
+
+  var viewId = "owner"  
+
+  var apiHost = config.apiHost
+
+  var postUrl = apiHost + "/obp/v2.1.0/banks/" + fromBankId + "/accounts/" + fromAccountId + "/" + viewId + "/transaction-request-types/" + transactionRequestType + "/transaction-requests";
+
+  console.log("postUrl is " + postUrl);
+
+
+  
+
+  consumer.post(postUrl,
+  req.session.oauthAccessToken,
+  req.session.oauthAccessTokenSecret,
+  details,
+  "application/json",
+  function (error, data, response) {
+
+      var error = JSON.stringify(error)
+
+      console.log("error is: " + error)
+      console.log("data is: " + data)
+      console.log("response is: " + response)
+
+
+        try {
+          var parsedData = JSON.parse(data);
+          console.log("parsedData is: " + parsedData)
+          message = "Parsed JSON OK"
+        } catch (err) {
+            // handle the error safely
+            console.log(err)
+            message = "Something went wrong creating a transaction request - did you supply the correct values?"
+        }
+
+      var options = {"error": error,
+                     "postUrl" : postUrl, 
+                     "fromBankId": fromBankId,
+                     "fromAccountId": fromAccountId,
+                     "toBankId": toBankId,
+                     "toAccountId" : toAccountId,
+                     "currency" : currency,
+                     "transactionRequestType" : transactionRequestType,
+                     "details": details,
+                     "data": data};   
+
+      var html = pug.renderFile(template, options) 
+
+      res.status(200).send(html)
+  });
+});
+
+
+
+
 
 
 app.get('*', function(req, res){

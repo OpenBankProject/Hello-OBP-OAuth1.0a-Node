@@ -8,12 +8,13 @@ into a NodeJS application.
 
 Get consumer key / secret:
 register your client at https://apisandbox.openbankproject.com/consumer-registration
-and add the key and secret in your config.json file like so:
+and add the host, key and secret in your config.json file like so:
 
 
 	config.json
 	
-    { 
+    {
+    "apiHost": "https://apisandbox.openbankproject.com", 
     "consumerKey": "YOUR CONSUMER KEY GOES HERE",
     "consumerSecret" : "YOUR CONSUMER SECRET GOES HERE"
     }
@@ -31,10 +32,12 @@ Navigate to the page:
 http://127.0.0.1:8085
 (not http://localhost:8085 in this example as the session won't be set)
 
-You can log in as a test user, using the following credentials:
+You can log in as a test user, using the following credentials on the general OBP API sandbox:
 
 username: joe.bloggs@example.com
 password: qwerty
+
+Each public sandbox generally has a github wiki page with dummy customer logins. See the home page of the API sandbox you are using.
 
 ## REFERENCES
 
