@@ -149,7 +149,7 @@ app.get('/createTransactionRequest', function(req, res){
   
 
   var template = "./template/createTransactionRequest.pug";
-  var options = null; 
+  var options = { transactionRequestType :"SANDBOX_TAN"}; 
   var html = pug.renderFile(template, options);
 
 
@@ -186,7 +186,11 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
 
 
   var transactionRequestType = req.body.transaction_request_type;
-  if (transactionRequestType == ""){
+
+  console.log("transactionRequestType is: " + transactionRequestType);
+
+
+  if (transactionRequestType.length == 0){
     transactionRequestType = "SANDBOX_TAN";
   }
 
@@ -199,8 +203,7 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
 
   var details = JSON.stringify(detailsObj)
 
-  console.log("detailsObj is: " + details);
-
+  console.log("details is: " + details);
 
 
   var viewId = "owner"  
@@ -211,14 +214,11 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
 
   console.log("postUrl is " + postUrl);
 
-
-  
-
   consumer.post(postUrl,
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
-  details,
-  "application/json",
+  details, // This is the body of the request
+  "application/json", // Must specify this else will get 404
   function (error, data, response) {
 
       var error = JSON.stringify(error)
@@ -231,7 +231,7 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
         try {
           var parsedData = JSON.parse(data);
           console.log("parsedData is: " + parsedData)
-          message = "Parsed JSON OK"
+          message = ""
         } catch (err) {
             // handle the error safely
             console.log(err)

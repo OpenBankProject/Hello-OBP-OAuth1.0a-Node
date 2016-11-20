@@ -1,12 +1,7 @@
 block content
     h1= title
 
-    p #{message}
-    p #{error}
-    p POST URL #{postUrl}
-    p #{details}
-    p #{data}
-
+    h2 Form:
 
     form(name="transaction-request", method="post")
         div.input
@@ -36,3 +31,12 @@ block content
 
         div.actions
             input(type="submit", value="Submit")
+
+
+    h2 Info:
+    
+    p #{message}
+    p #{error}
+    p POSTed URL: #{postUrl}
+    p Body: #{details}
+    p Response from API: #{data}
