@@ -50,9 +50,7 @@ var config = require('./config.json');
 
 // Used to validate forms
 var bodyParser = require('body-parser')
-// app.use(bodyParser.urlencoded({
-//   extended: false
-// }));
+
 
 // create application/x-www-form-urlencoded parser 
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
@@ -62,7 +60,7 @@ var _openbankConsumerKey = config.consumerKey;
 var _openbankConsumerSecret = config.consumerSecret;
 
 
-
+// The location, on the interweb, of the OBP API server we want to use.
 var apiHost = config.apiHost;
 
 console.log ("apiHost is: " + apiHost)
@@ -119,7 +117,7 @@ app.get('/callback', function(req, res){
 
 
 app.get('/signed_in', function(req, res){
-  res.status(200).send('Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> <br><a href="/getCurrentUser">Get Current User</a> <br><a href="/createTransactionRequest">Create Transaction Request (make payment)</a> <br> <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
+  res.status(200).send('Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> <br><a href="/getCurrentUser">Get Current User</a> <br><a href="/createTransactionRequest">Create Transaction Request (make payment)</a> <br> <a href="/loadCustomers">Load Customers (this is an admin utility function) </a> <br>  <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
 });
 
 
@@ -255,8 +253,104 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
   });
 });
 
+// WORK IN PROGRESS
+app.get('/loadCustomers', function(req, res){
+  
+
+  var template = "./template/loadCustomers.pug";
 
 
+  var customers = require('/Users/simonredfern/Documents/OpenBankProject/DATA/korea/OBP_sandbox_customers_pretty.json');
+
+
+  console.log('before customer loop. There are ' + customers.length + ' customers.')
+
+  for(var i = 0; i < customers.length; i++) {
+
+    console.log('i is : ' + i);
+
+      var customer = customers[i];
+      var usersByEmailUrl = apiHost + '/obp/v2.1.0/users/' + customer.email;
+      console.log('url to call: ' + usersByEmailUrl)
+
+
+      // get user by email
+      consumer.get(usersByEmailUrl,
+      req.session.oauthAccessToken,
+      req.session.oauthAccessTokenSecret,
+      function (error, data, response) {
+          var usersData = JSON.parse(data);
+
+          console.log('usersData is: ' + JSON.stringify(usersData))
+
+          var userId = usersData.users[0].user_id
+
+          console.log('user_id is: ' + userId)
+
+          var postCustomerUrl = apiHost + '/obp/v2.1.0/banks/' + customer.bank_id;
+          console.log('url to call: ' + postCustomerUrl)
+
+          customerToPost = {"user_id" : userId, 
+                            "customer_number": customer.customer_number,
+                            "legal_name": customer.legal_name,
+                            "mobile_phone_number": customer.mobile_phone_number,
+                            "email": customer.email,
+                            "face_image": customer.face_image,
+                            "date_of_birth":customer.date_of_birth,  
+                            "relationship_status": customer.relationship_status,
+                            "dependants": customer.dependants,  
+                            "dob_of_dependants": customer.dob_of_dependants,
+                            "highest_education_attained": customer.highest_education_attained,
+                            "employment_status": customer.employment_status,
+                            "kyc_status": customer.kyc_status,  
+                            "last_ok_date": customer.last_ok_date
+                          }
+
+          console.log('customerToPost: ' + JSON.stringify(customerToPost))
+
+
+          consumer.get(postCustomerUrl,
+            req.session.oauthAccessToken,
+            req.session.oauthAccessTokenSecret,
+            function (error, data, response) {
+              var parsedData = JSON.parse(data);
+
+              console.log('response from postCustomerUrl: ' + JSON.stringify(parsedData))
+
+          });
+
+              // (function() {
+              //   var j = i;
+
+              //   console.log('j is : ' + j);
+
+              //   var obj = customers[j];
+              //   var userByEmailUrl = apiHost + '/obp/v2.1.0/users/' + obj.email;
+              //   console.log('url to call: ' + userByEmailUrl)
+
+              // });
+
+
+  
+
+
+          
+      }); // End get user by email
+
+
+
+
+
+
+  }
+
+    var options = {"countCustomers": customers.length}; 
+    var html = pug.renderFile(template, options);
+
+    res.status(200).send(html)
+
+
+});
 
 
 
