@@ -25,7 +25,7 @@
 // Stefan Bethge
 // Simon Redfern
 
-var express = require('express', template = require('jade'));
+var express = require('express', template = require('pug'));
 var session = require('express-session')
 var util = require('util');
 var oauth = require('oauth');
@@ -166,9 +166,6 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
   
   var template = "./template/createTransactionRequest.pug";
   
-  
-
-
   if (!req.body) return res.sendStatus(400)
   
   var fromBankId = req.body.from_bank_id;
@@ -253,102 +250,79 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
   });
 });
 
-// WORK IN PROGRESS
-app.get('/loadCustomers', function(req, res){
-  
 
-  var template = "./template/loadCustomers.pug";
+// Loop through a Customers file, find the User matching email, Post the customer (which links to the User)
+app.get('/loadCustomers', function(req, res) {
 
+    var template = "./template/loadCustomers.pug";
+    var customers = require('/Users/simonredfern/Documents/OpenBankProject/DATA/korea/OBP_sandbox_customers_pretty.json');
 
-  var customers = require('/Users/simonredfern/Documents/OpenBankProject/DATA/korea/OBP_sandbox_customers_pretty.json');
-
-
-  console.log('before customer loop. There are ' + customers.length + ' customers.')
-
-  for(var i = 0; i < customers.length; i++) {
-
-    console.log('i is : ' + i);
-
-      var customer = customers[i];
-      var usersByEmailUrl = apiHost + '/obp/v2.1.0/users/' + customer.email;
-      console.log('url to call: ' + usersByEmailUrl)
+    console.log('before customer loop. There are ' + customers.length + ' customers.')
 
 
-      // get user by email
-      consumer.get(usersByEmailUrl,
-      req.session.oauthAccessToken,
-      req.session.oauthAccessTokenSecret,
-      function (error, data, response) {
-          var usersData = JSON.parse(data);
+    customers.forEach(function processCustomer(customer) {
 
-          console.log('usersData is: ' + JSON.stringify(usersData))
+            var usersByEmailUrl = apiHost + '/obp/v2.1.0/users/' + customer.email;
+            console.log('url to call: ' + usersByEmailUrl)
 
-          var userId = usersData.users[0].user_id
+            // get user by email
+            consumer.get(usersByEmailUrl,
+                req.session.oauthAccessToken,
+                req.session.oauthAccessTokenSecret,
+                function getUserForCustomer(error, data) {
+                    if (error) return console.log(error);
+                    var usersData = JSON.parse(data);
+                    console.log('usersData is: ' + JSON.stringify(usersData))
+                    var userId = usersData.users[0].user_id
+                    console.log('I got userId: ' + userId)
+                    console.log('I got customer with email , number : ' + customer.email + ' , ' + customer.customer_number)
+                    customerToPost = {
+                        "user_id": userId,
+                        "customer_number": customer.customer_number,
+                        "legal_name": customer.legal_name,
+                        "mobile_phone_number": customer.mobile_phone_number,
+                        "email": customer.email,
+                        "face_image": customer.face_image,
+                        "date_of_birth": customer.date_of_birth,
+                        "relationship_status": customer.relationship_status,
+                        "dependants": customer.dependants,
+                        "dob_of_dependants": customer.dob_of_dependants,
+                        "highest_education_attained": customer.highest_education_attained,
+                        "employment_status": customer.employment_status,
+                        "kyc_status": customer.kyc_status,
+                        "last_ok_date": customer.last_ok_date
+                    }
 
-          console.log('user_id is: ' + userId)
+                    console.log('customerToPost: ' + JSON.stringify(customerToPost))
 
-          var postCustomerUrl = apiHost + '/obp/v2.1.0/banks/' + customer.bank_id;
-          console.log('url to call: ' + postCustomerUrl)
+                    var postCustomerUrl = apiHost + '/obp/v2.1.0/banks/' + customer.bank_id + '/customers';
 
-          customerToPost = {"user_id" : userId, 
-                            "customer_number": customer.customer_number,
-                            "legal_name": customer.legal_name,
-                            "mobile_phone_number": customer.mobile_phone_number,
-                            "email": customer.email,
-                            "face_image": customer.face_image,
-                            "date_of_birth":customer.date_of_birth,  
-                            "relationship_status": customer.relationship_status,
-                            "dependants": customer.dependants,  
-                            "dob_of_dependants": customer.dob_of_dependants,
-                            "highest_education_attained": customer.highest_education_attained,
-                            "employment_status": customer.employment_status,
-                            "kyc_status": customer.kyc_status,  
-                            "last_ok_date": customer.last_ok_date
-                          }
-
-          console.log('customerToPost: ' + JSON.stringify(customerToPost))
-
-
-          consumer.get(postCustomerUrl,
-            req.session.oauthAccessToken,
-            req.session.oauthAccessTokenSecret,
-            function (error, data, response) {
-              var parsedData = JSON.parse(data);
-
-              console.log('response from postCustomerUrl: ' + JSON.stringify(parsedData))
-
-          });
-
-              // (function() {
-              //   var j = i;
-
-              //   console.log('j is : ' + j);
-
-              //   var obj = customers[j];
-              //   var userByEmailUrl = apiHost + '/obp/v2.1.0/users/' + obj.email;
-              //   console.log('url to call: ' + userByEmailUrl)
-
-              // });
+                    console.log('postCustomerUrl: ' + postCustomerUrl)
 
 
-  
+                    consumer.post(postCustomerUrl,
+                        req.session.oauthAccessToken,
+                        req.session.oauthAccessTokenSecret,
+                        JSON.stringify(customerToPost), // This is the body of the request
+                        "application/json", // Must specify this else will get 404
+                        function (error, data) {
+                            if (error) return console.log(error);
+                            var parsedData = JSON.parse(data);
+                            console.log('response from postCustomerUrl: ' + JSON.stringify(parsedData))
+                            
+                        }); // End post customer
+
+                }); // End get user by email
+        
+    }); // End Customer loop
 
 
-          
-      }); // End get user by email
-
-
-
-
-
-
-  }
-
-    var options = {"countCustomers": customers.length}; 
+    var options = {
+        "countCustomers": customers.length
+    };
     var html = pug.renderFile(template, options);
 
     res.status(200).send(html)
-
 
 });
 
