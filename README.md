@@ -14,7 +14,7 @@ and add the host, key and secret in your config.json file like so:
 	config.json
 	
     {
-    "apiHost": "https://apisandbox.openbankproject.com", 
+    "apiHost": "https://apisandbox.openbankproject.com PLEASE CHANGE THIS TO THE HOST YOU ARE USING!!", 
     "consumerKey": "YOUR CONSUMER KEY GOES HERE",
     "consumerSecret" : "YOUR CONSUMER SECRET GOES HERE"
     }
