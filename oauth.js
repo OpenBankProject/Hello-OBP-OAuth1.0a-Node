@@ -117,7 +117,13 @@ app.get('/callback', function(req, res){
 
 
 app.get('/signed_in', function(req, res){
-  res.status(200).send('Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> <br><a href="/getCurrentUser">Get Current User</a> <br><a href="/createTransactionRequest">Create Transaction Request (make payment)</a> <br> <a href="/loadCustomers">Load Customers (this is an admin utility function) </a> <br>  <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
+
+  var template = "./template/signedIn.pug"
+  var options = {}
+  var html = pug.renderFile(template, options)
+  res.status(200).send(html)
+
+   // 'Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> <br><a href="/getCurrentUser">Get Current User</a> <br><a href="/createTransactionRequest">Create Transaction Request (make payment)</a> <br> <a href="/loadCustomers">Load Customers (this is an admin utility function) </a> <br>  <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
 });
 
 
@@ -255,7 +261,18 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
 app.get('/loadCustomers', function(req, res) {
 
     var template = "./template/loadCustomers.pug";
-    var customers = require('/Users/simonredfern/Documents/OpenBankProject/DATA/korea/OBP_sandbox_customers_pretty.json');
+
+    // Location of customer file is stored in filesConfig.json like this:
+    //
+    // {
+    // "customerFile": "/path-to/OBP_sandbox_customers_pretty.json", 
+    // "sandboxFile": "/path-to/OBP_sandbox_pretty.json"
+    // }
+
+    var filesConfig = require('./filesConfig.json');
+
+    var customers = require(filesConfig.customerFile);
+
 
     console.log('before customer loop. There are ' + customers.length + ' customers.')
 
@@ -325,6 +342,73 @@ app.get('/loadCustomers', function(req, res) {
     res.status(200).send(html)
 
 });
+
+
+
+// Create Entitlements for user (e.g. loop through banks)
+app.get('/createEntitlements', function(req, res) {
+
+    var template = "./template/simple.pug"
+
+    // Location of sandbox file is stored in filesConfig.json like this:
+    //
+    // {
+    // "customerFile": "/path-to/OBP_sandbox_customers_pretty.json", 
+    // "sandboxFile": "/path-to/OBP_sandbox_pretty.json"
+    // }
+
+    var dataConfig = require('./filesConfig.json')
+
+    var sandbox = require(dataConfig.sandboxFile)
+
+    var banks = sandbox.banks
+
+
+    console.log('before loop. There are ' + banks.length + ' banks.')
+
+
+    // {
+    // "userId": "asiodiuiof35234" 
+    // }
+
+    var miscConfig = require('./miscConfig.json')
+
+    var userId = miscConfig.userId
+
+    banks.forEach(function processCustomer(bank) {
+
+            var postUrl = apiHost + '/obp/v2.1.0/users/' + userId + '/entitlements';
+            console.log('url to call: ' + postUrl)
+
+            //var postBody = {"bank_id":bank.id, "role_name":"CanCreateCustomer"}
+            var postBody = {"bank_id":bank.id, "role_name":"CanCreateUserCustomerLink"}
+
+            consumer.post(postUrl,
+                req.session.oauthAccessToken,
+                req.session.oauthAccessTokenSecret,
+                JSON.stringify(postBody), // This is the body of the request
+                "application/json", // Must specify this else will get 404
+                function getUserForCustomer(error, data) {
+                    if (error) return console.log(error);
+                    var data = JSON.parse(data);
+                    console.log('data is: ' + JSON.stringify(data))
+                }); // End POST        
+    }); // End Loop
+
+
+    var options = {
+        "count": banks.length
+    };
+    var html = pug.renderFile(template, options);
+
+    res.status(200).send(html)
+
+});
+
+
+
+
+
 
 
 
