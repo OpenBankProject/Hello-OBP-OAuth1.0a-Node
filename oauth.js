@@ -58,6 +58,7 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 var _openbankConsumerKey = config.consumerKey;
 var _openbankConsumerSecret = config.consumerSecret;
+var _openbankRedirectUrl = config.redirectUrl;
 
 
 // The location, on the interweb, of the OBP API server we want to use.
@@ -72,7 +73,7 @@ var consumer = new oauth.OAuth(
   _openbankConsumerKey,
   _openbankConsumerSecret,
   '1.0',                             //rfc oauth 1.0, includes 1.0a
-  'http://127.0.0.1:8085/callback',
+  _openbankRedirectUrl,
   'HMAC-SHA1');
 
 var cookieParser = require('cookie-parser');
