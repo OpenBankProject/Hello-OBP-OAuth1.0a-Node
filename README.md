@@ -16,7 +16,7 @@ and add the host, key and secret in your config.json file like so:
     {
     "apiHost": "https://apisandbox.openbankproject.com PLEASE CHANGE THIS TO THE HOST YOU ARE USING!!", 
     "consumerKey": "YOUR CONSUMER KEY GOES HERE",
-    "consumerSecret" : "YOUR CONSUMER SECRET GOES HERE"
+    "consumerSecret" : "YOUR CONSUMER SECRET GOES HERE",
     "redirectUrl": "http://127.0.0.1:8085/callback"
     }
 
