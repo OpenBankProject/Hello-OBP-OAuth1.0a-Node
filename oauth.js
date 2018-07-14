@@ -32,21 +32,18 @@ var oauth = require('oauth');
 
 var app = express();
 
-// To get the values for the following fields, please register your client here:
-// https://apisandbox.openbankproject.com/consumer-registration
-// Then create a file called config.json in this directory 
-// and paste your consumer key and secret like this:
-//config.json:
-//{ 
-//"consumerKey": "YOUR CONSUMER KEY GOES HERE",
-//"consumerSecret" : "YOUR CONSUMER SECRET GOES HERE"
-//}
+/////////////////////////////////////
+// OAuth Config:
+// To make authenticated calls to the API, you need OAuth keys 
+// To get them, please register your App here:
+// https://YOUR-OBP-API-HOST/consumer-registration
+// See README.md for an example config.json
+// This loads your consumer key and secret from a file you create.
+var config = require('./config.json');
+//////////////////////////////////////
 
 // Template engine (previously known as Jade)
 var pug = require('pug');
-
-// This loads your consumer key and secret from a file you create.
-var config = require('./config.json');
 
 // Used to validate forms
 var bodyParser = require('body-parser')
