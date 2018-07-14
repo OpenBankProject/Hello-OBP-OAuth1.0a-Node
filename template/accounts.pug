@@ -1,0 +1,10 @@
+block content
+    h1= title
+
+    ul
+      each account in json.accounts
+        li= account.id
+      else
+        li There are no accounts
+
+

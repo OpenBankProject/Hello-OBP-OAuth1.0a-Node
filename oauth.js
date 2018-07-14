@@ -121,8 +121,7 @@ app.get('/signed_in', function(req, res){
   var html = pug.renderFile(template, options)
   res.status(200).send(html)
 
-   // 'Signing in by OAuth worked. Now you can do API calls on private data like this: <br><a href="/getMyAccounts">Get My Accounts</a> <br><a href="/getCurrentUser">Get Current User</a> <br><a href="/createTransactionRequest">Create Transaction Request (make payment)</a> <br> <a href="/loadCustomers">Load Customers (this is an admin utility function) </a> <br>  <br> Please see the <a href="https://apiexplorersandbox.openbankproject.com">API Explorer</a> for the full list of API calls available.')
-});
+ });
 
 
 app.get('/getCurrentUser', function(req, res){
@@ -136,7 +135,7 @@ app.get('/getCurrentUser', function(req, res){
 });
 
 
-app.get('/getMyAccounts', function(req, res){
+app.get('/getMyAccountsJson', function(req, res){
   consumer.get(apiHost + "/obp/v3.0.0/my/accounts",
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
@@ -145,6 +144,31 @@ app.get('/getMyAccounts', function(req, res){
       res.status(200).send(parsedData)
   });
 });
+
+app.get('/getMyAccounts', function(req, res){
+
+  const util = require('util');
+  
+  var template = "./template/accounts.pug";
+  var title = "Accounts"
+  
+  consumer.get(apiHost + "/obp/v3.0.0/my/accounts",
+  req.session.oauthAccessToken,
+  req.session.oauthAccessTokenSecret,
+  // When the GET request completes, we call the following function with the data we got back:
+  function (error, data, response) {
+      //console.log("error is: " + error);
+      //console.log("data is: " + data);
+      //console.log("response is: " + response);
+      var json = JSON.parse(data);
+      //console.log("json is: " + util.inspect(json, false, null))
+
+      var options = { title: title, error: error, json : json, response: response}; 
+      var html = pug.renderFile(template, options);
+      res.status(200).send(html)
+  });
+});
+
 
 
 app.get('/createTransactionRequest', function(req, res){
