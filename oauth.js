@@ -140,7 +140,7 @@ app.get('/getCurrentUser', function(req, res){
 
 
 app.get('/getMyAccounts', function(req, res){
-  consumer.get(apiHost + "/obp/v2.1.0/my/accounts",
+  consumer.get(apiHost + "/obp/v3.0.0/my/accounts",
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
   function (error, data, response) {
@@ -158,7 +158,7 @@ app.get('/createTransactionRequest', function(req, res){
   var html = pug.renderFile(template, options);
 
 
-  consumer.get(apiHost + "/obp/v2.1.0/my/accounts",
+  consumer.get(apiHost + "/obp/v3.0.0/my/accounts",
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
   function (error, data, response) {
