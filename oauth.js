@@ -144,8 +144,12 @@ app.get('/getCurrentUser', function(req, res){
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
   function (error, data, response) {
+      try {
       var parsedData = JSON.parse(data);
       res.status(200).send(parsedData)
+    } catch (exception){
+      onException(res, exception, data);
+    }
   });
 });
 
@@ -155,8 +159,12 @@ app.get('/getMyAccountsJson', function(req, res){
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
   function (error, data, response) {
+    try {
       var parsedData = JSON.parse(data);
       res.status(200).send(parsedData)
+    } catch (exception){
+      onException(res, exception, data);
+    }
   });
 });
 
