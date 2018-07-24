@@ -57,11 +57,26 @@ var _openbankConsumerKey = config.consumerKey;
 var _openbankConsumerSecret = config.consumerSecret;
 var _openbankRedirectUrl = config.redirectUrl;
 
+var port = 8085
 
 // The location, on the interweb, of the OBP API server we want to use.
 var apiHost = config.apiHost;
 
-console.log ("apiHost is: " + apiHost)
+console.log ("Your apiHost is: " + apiHost)
+console.log ("This application is running on http:127.0.0.1:" + port)
+console.log ("The redirect URL is: " + _openbankRedirectUrl)
+
+
+function onException (res, exception, moreData) {
+          template = "./template/oops.pug";
+          title = "Oops, something went wrong."
+          subTitle = "Maybe you are not logged in?"
+
+          console.log('we got an exception:' + exception);
+          var options = { title: title, subTitle: subTitle, exception: exception, moreData: moreData}; 
+          var html = pug.renderFile(template, options);
+          res.status(500).send(html)
+}
 
 
 var consumer = new oauth.OAuth(
@@ -160,12 +175,16 @@ app.get('/getMyAccounts', function(req, res){
       //console.log("error is: " + error);
       //console.log("data is: " + data);
       //console.log("response is: " + response);
-      var json = JSON.parse(data);
-      //console.log("json is: " + util.inspect(json, false, null))
 
-      var options = { title: title, error: error, json : json, response: response}; 
-      var html = pug.renderFile(template, options);
-      res.status(200).send(html)
+       try {
+          var json = JSON.parse(data);
+          //console.log("json is: " + util.inspect(json, false, null))
+          var options = { title: title, error: error, json : json, response: response}; 
+          var html = pug.renderFile(template, options);
+          res.status(200).send(html)
+        } catch (exception) {
+          onException(res, exception, data);
+        }
   });
 });
 
@@ -438,5 +457,5 @@ app.get('*', function(req, res){
   res.redirect('/connect');
 });
 
-app.listen(8085);
+app.listen(port);
 
