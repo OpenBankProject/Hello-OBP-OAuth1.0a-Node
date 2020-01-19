@@ -63,7 +63,7 @@ var port = 8085
 var apiHost = config.apiHost;
 
 console.log ("Your apiHost is: " + apiHost)
-console.log ("This application is running on http:127.0.0.1:" + port)
+console.log ("This application is running on http://127.0.0.1:" + port)
 console.log ("The redirect URL is: " + _openbankRedirectUrl)
 
 
