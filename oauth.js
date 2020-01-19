@@ -140,7 +140,7 @@ app.get('/signed_in', function(req, res){
 
 
 app.get('/getCurrentUser', function(req, res){
-  consumer.get(apiHost + "/obp/v2.1.0/users/current",
+  consumer.get(apiHost + "/obp/v3.1.0/users/current",
   req.session.oauthAccessToken,
   req.session.oauthAccessTokenSecret,
   function (error, data, response) {
@@ -260,7 +260,7 @@ app.post('/createTransactionRequest', urlencodedParser, function(req, res){
 
   var apiHost = config.apiHost
 
-  var postUrl = apiHost + "/obp/v2.1.0/banks/" + fromBankId + "/accounts/" + fromAccountId + "/" + viewId + "/transaction-request-types/" + transactionRequestType + "/transaction-requests";
+  var postUrl = apiHost + "/obp/v3.1.0/banks/" + fromBankId + "/accounts/" + fromAccountId + "/" + viewId + "/transaction-request-types/" + transactionRequestType + "/transaction-requests";
 
   console.log("postUrl is " + postUrl);
 
@@ -328,7 +328,7 @@ app.get('/loadCustomers', function(req, res) {
 
     customers.forEach(function processCustomer(customer) {
 
-            var usersByEmailUrl = apiHost + '/obp/v2.1.0/users/' + customer.email;
+            var usersByEmailUrl = apiHost + '/obp/v3.1.0/users/' + customer.email;
             console.log('url to call: ' + usersByEmailUrl)
 
             // get user by email
@@ -361,7 +361,7 @@ app.get('/loadCustomers', function(req, res) {
 
                     console.log('customerToPost: ' + JSON.stringify(customerToPost))
 
-                    var postCustomerUrl = apiHost + '/obp/v2.1.0/banks/' + customer.bank_id + '/customers';
+                    var postCustomerUrl = apiHost + '/obp/v3.1.0/banks/' + customer.bank_id + '/customers';
 
                     console.log('postCustomerUrl: ' + postCustomerUrl)
 
@@ -426,7 +426,7 @@ app.get('/createEntitlements', function(req, res) {
 
     banks.forEach(function processCustomer(bank) {
 
-            var postUrl = apiHost + '/obp/v2.1.0/users/' + userId + '/entitlements';
+            var postUrl = apiHost + '/obp/v3.1.0/users/' + userId + '/entitlements';
             console.log('url to call: ' + postUrl)
 
             //var postBody = {"bank_id":bank.id, "role_name":"CanCreateCustomer"}
