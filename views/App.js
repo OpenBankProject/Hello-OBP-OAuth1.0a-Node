@@ -3,10 +3,14 @@ const App = {
   template: `<div class="navbar">
       <nav class="nav">
         <div class="nav-el" id="name_project">
-          Authentication
+          <router-link to="/">OBP</router-link>
+        </div>
+         <div class="nav-el">
+          <router-link to="/layout">Layout</router-link>
         </div>
       </nav>
-    </div>`,
+    </div>
+    <router-view></router-view>`,
 };
 
 export default App;
