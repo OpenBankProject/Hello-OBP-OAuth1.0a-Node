@@ -27,7 +27,7 @@ Install Dependencies:
 npm install
 
 Start Server:
-node oauth.js
+ts-node oauth.ts
 
 Navigate to the page:
 http://127.0.0.1:8085
